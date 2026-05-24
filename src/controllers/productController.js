@@ -130,6 +130,14 @@ const addCart = async(req, res) => {
         }
 
         const productName = productsInSystem.find(p => p.id === productId)
+
+        if(!productName){
+            return res.status(400).json({
+                success : false,
+                message : "ไม่พบสินค้า"
+            })
+        }
+
         if(Number(quantity)>productName.stock){
             return res.status(400).json({
                 success : false,
@@ -139,12 +147,6 @@ const addCart = async(req, res) => {
         }
         productName.stock -= Number(quantity)
 
-        if(!productName){
-            return res.status(400).json({
-                success : false,
-                message : "ไม่พบสินค้า"
-            })
-        }
 
         const shoppingItem = shoppingCart.find(p => p.id === productId)
         let totalPrice = productName.price * Number(quantity)
@@ -153,12 +155,12 @@ const addCart = async(req, res) => {
             id : productName.id,
             name : productName.name,
             quantity : Number(quantity),
-            totalPrice : totalPrice
+            totalPrice
         }
         
         if(shoppingItem){
-            shoppingItem.quantity = shoppingItem.quantity + Number(quantity) 
-            shoppingItem.totalPrice = shoppingItem.totalPrice + (productName.price * Number(quantity))
+            shoppingItem.quantity =+ Number(quantity) 
+            shoppingItem.totalPrice =+ totalPrice
             return res.status(200).json({
                 success : true, 
                 message : "เพิ่มข้อมูลสำเร็จ",
@@ -186,7 +188,7 @@ const addCart = async(req, res) => {
 const getCart = (req, res) => {
     try{
         let grandPrice = 0
-        for(i=0; i<shoppingCart.length; i++){
+        for(let i=0; i<shoppingCart.length; i++){
             const item = shoppingCart[i]
             grandPrice = grandPrice + item.totalPrice
         }
