@@ -24,7 +24,6 @@ const getProduct = async(req, res) => {
     try{
         const id = req.params.id
         const productId = await Product.findById(id).exec()
-
         if(!productId){
             return res.status(500).json({
                 success : false,
@@ -137,6 +136,23 @@ const deleteProduct = async(req, res) => {
         })
 
     }catch(err){
+        res.status(500).json({
+            success : false,
+            message : "Server Error"
+        })
+    }
+}
+
+const deleteAll = async(req, res) => {
+    try{
+        const deleted = await Product.deleteMany({}).exec()
+        res.status(200).json({
+            success : true,
+            message : "Delete All",
+            data : deleted
+        })
+    }catch(err){
+        console.log(err)
         res.status(500).json({
             success : false,
             message : "Server Error"
@@ -281,8 +297,10 @@ const clearCart = async(req, res) => {
 
 module.exports = {
     getProducts,
+    getProduct,
     createProduct,
     updateProduct,
+    deleteAll,
     deleteProduct,
     addCart,
     getCart,
