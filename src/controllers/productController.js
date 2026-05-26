@@ -55,6 +55,13 @@ const createProduct = async(req, res) => {
             message : "กรุณาส่งข้อมูลเป็นตัวเลข"
         })
     }
+    if(price < 0 || stock < 0){
+        return res.status(400).json({
+            success : false,
+            message : "กรุณาใส่ค่าให้ถูกต้อง"
+        })
+    }
+    
     const productItem = await Product.findOne({name : name})
 
 
