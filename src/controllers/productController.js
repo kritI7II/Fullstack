@@ -1,17 +1,15 @@
-let productsInSystem = [
-            {id : 1, name : "DIOR",price : 40_000 , stock: 10},
-            {id : 2, name : "FANTA", price : 15, stock: 10},
-            {id : 3, name : "COCA COLA" , price : 20, stock: 10}
-        ]
+
+const Product = require('../models/productModel')
 
 let shoppingCart = [];
 
 const getProducts = async(req, res) => {
     try{
+        const product = await Product.find({}).exec()
         res.status(200).json({
             success : true,
             message : "ดึงข้อมูลสำเร็จ",
-            data : productsInSystem
+            data : product
         })
     }catch(err){
         console.log(err)
@@ -22,31 +20,60 @@ const getProducts = async(req, res) => {
     }
 }
 
-const createProduct = (req, res) => {
+const getProduct = async(req, res) => {
     try{
-    const { name , price } = req.body
-    
-    if(productsInSystem.find(p => p.name === name)){
+        const id = req.params.id
+        const productId = await Product.findById(id).exec()
+
+        if(!productId){
+            return res.status(500).json({
+                success : false,
+                message : "ไม่พบข้อมูลสินค้าชิ้นนี้"
+            })
+        }
+
+        res.status(200).json({
+            success : true,
+            message : "ส่งข้อมูลสำเร็จ",
+            data : productId
+        })
+
+    }catch(err){
+        console.log(err)
+        res.status(500).json({
+            success : false,
+            message : "Server Error"
+        })
+    }
+}
+
+const createProduct = async(req, res) => {
+    try{
+    const { name , price ,stock , category } = req.body
+    if  ( typeof(price) === 'string'|| typeof(stock) === 'string'){
+        return res.status(400).json({
+            success : false,
+            message : "กรุณาส่งข้อมูลเป็นตัวเลข"
+        })
+    }
+    const productItem = await Product.findOne({name : name})
+
+
+    if(productItem){
         return res.status(400).json({
             success : false,
             message : "มีสินค้าชื่อนี้อยู่แล้ว"
         })
     }
 
-    if(!name || !price){
-       return res.status(400).json({
-            success : false,
-            message : "กรุณาใส่ข้อมูลให้ครบ"
-        })}
-
-        const newProduct = {
-            id : productsInSystem.length > 0 ? productsInSystem[productsInSystem.length - 1].id + 1 : 1,
+        const newProduct = new Product({
             name ,
-            price : Number(price)
-        }
-
-        productsInSystem.push(newProduct)
-
+            price : Number(price),
+            stock : Number(stock),
+            category}
+        )
+        await newProduct.save()
+        
         res.status(200).json({
             success : true,
             message : "สร้างสินค้าสำเร็จ",
@@ -61,29 +88,29 @@ const createProduct = (req, res) => {
     }
 }
 
-const updateProduct = (req, res) => {
+const updateProduct = async(req, res) => {
     try{
-        const productId = Number(req.params.id)
-        const { name , price } = req.body
+        const { name , price ,stock , category } = req.body
+        const productId = req.params.id
+        const id = await Product.findById(productId).exec()
 
-        const productIndex = productsInSystem.findIndex(p => p.id === productId)
-
-        if (productIndex === -1 ){
+        if(!id){
             return res.status(400).json({
-                success : false,
-                message : "ไม่พบข้อมูล"
+                success : false ,
+                message : "ไม่มีข้อมูลนี้ในระบบ"
             })
-        
         }
-    if(name) productsInSystem[productIndex].name = name
-    if(price) productsInSystem[productIndex].price = Number(price)
 
+        const updateItem= { name , price ,stock , category }
+        const productItem = await Product.findByIdAndUpdate(productId ,updateItem, {new : true})
+        
     res.status(200).json({
         success : true,
         message : "แก้ไขข้อมูลสำเร็จ",
-        data : productsInSystem[productIndex]
+        data : productItem
     })
     }catch(err){
+        console.log(err)
         res.status(500).json({
             success : false,
             message : "Server Error"
@@ -91,24 +118,24 @@ const updateProduct = (req, res) => {
     }
 }
 
-const deleteProduct = (req, res) => {
+const deleteProduct = async(req, res) => {
     try{
-        const productId = Number(req.params.id)
-        const productExist = productsInSystem.find(p => p.id === productId)
+        const productId = req.params.id
+        const deleteItem = await Product.findByIdAndDelete(productId).exec()
 
-        if(!productExist){
-            return res.status(404).json({
+        if(!deleteItem){
+            return res.status(400).json({
                 success : false,
-                message : "ไม่พบสินค้า"
+                message : "ไม่พบข้อมูล"
             })
         }
-        productsInSystem = productsInSystem.filter(p => p.id !== productId)
 
         res.status(200).json({
             success : true,
             message : "ลบช้อมูลสำเร็๋จ",
-            data : productsInSystem
+            data : deleteItem
         })
+
     }catch(err){
         res.status(500).json({
             success : false,
@@ -146,7 +173,6 @@ const addCart = async(req, res) => {
             })
         }
         productName.stock -= Number(quantity)
-
 
         const shoppingItem = shoppingCart.find(p => p.id === productId)
         let totalPrice = productName.price * Number(quantity)
@@ -252,6 +278,7 @@ const clearCart = async(req, res) => {
         })
     }
 }  
+
 module.exports = {
     getProducts,
     createProduct,
