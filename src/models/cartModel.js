@@ -1,10 +1,11 @@
 const mongoose = require('mongoose')
+const productModel = require('./productModel')
 
 const cartSchema = mongoose.Schema({
-            name : {
-                type : String,
-                require : [true, "กรุณาใส่ชื่อสินค้า"],
-                trim : true
+            productId : {
+                type : mongoose.Schema.Types.ObjectId,
+                ref : 'Product',
+                require : [true , "ไม่มีสินค้าชิ้นนี้"]
             },
             quantity : {
                 type : Number,
