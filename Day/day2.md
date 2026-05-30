@@ -1,3 +1,5 @@
 Current Day: Day 2 (26 พฤษภาคม 2026)
 
 Completed: เชื่อมต่อฐานข้อมูล MongoDB Atlas ผ่าน Mongoose Module (src/config/db.js) ได้สำเร็จอย่างมั่นคง, ออกแบบโครงสร้าง Product Schema (src/models/productModel.js) พร้อมติดตั้ง Data Validation เต็มรูปแบบ (ดักจับราคา/สต็อกไม่ให้ติดลบ และล็อกหมวดหมู่สินค้าด้วย Enum), ย้ายเลเยอร์การจัดการข้อมูลจาก Mock Data ใน Memory ขึ้นไปทำงานบน Database จริงด้วยคำสั่ง Product.find() และ Product.create() ผ่านโครงสร้างสถาปัตยกรรมแบบ async/await พร้อมครอบบล็อก try-catch เพื่อดักจับ Error และส่ง Status Code (เช่น 400 Bad Request) กลับไปอย่างถูกต้อง ป้องกันปัญหา Server Crash 100%
+
+Next Target: Day 3 (ย้ายระบบตะกร้าสินค้าจาก Memory ขึ้นฐานข้อมูล MongoDB พร้อมระบบ Inventory Syncing และการใช้ Populate เพื่อดึงข้อมูลสินค้า)
